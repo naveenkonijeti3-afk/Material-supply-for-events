@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EventMate - Event Material Supply</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f6f7fb;color:#20242b}
+header{background:#111827;color:white;padding:18px 7%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.logo{font-size:24px;font-weight:700}.nav a{color:white;text-decoration:none;margin-left:22px}
+.hero{padding:70px 7%;background:linear-gradient(135deg,#312e81,#7c3aed);color:white}
+.hero h1{font-size:46px;max-width:650px;margin:0 0 15px}.hero p{font-size:18px;max-width:650px}
+.btn{border:0;border-radius:8px;padding:12px 18px;background:#f59e0b;color:#111827;font-weight:bold;cursor:pointer}
+.container{padding:40px 7%}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:white;border-radius:14px;padding:22px;box-shadow:0 4px 18px #00000012}.icon{font-size:42px}
+.price{font-weight:bold;color:#6d28d9}.card button{margin-top:10px;width:100%}
+.form{max-width:650px;background:white;padding:25px;border-radius:14px;box-shadow:0 4px 18px #00000012}
+input,select,textarea{width:100%;padding:12px;margin:8px 0 15px;border:1px solid #d1d5db;border-radius:7px}
+footer{padding:25px 7%;background:#111827;color:white;text-align:center}
+#message{margin-top:15px;font-weight:bold}
+@media(max-width:650px){.nav{display:none}.hero h1{font-size:34px}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">🎪 EventMate</div>
+<nav class="nav"><a href="#materials">Materials</a><a href="#booking">Booking</a><a href="#contact">Contact</a></nav>
+</header>
+<section class="hero">
+<h1>Everything you need for your next event.</h1>
+<p>Rent or buy event materials including chairs, tables, tents, lighting and sound equipment.</p>
+<a href="#materials"><button class="btn">Browse Materials</button></a>
+</section>
+
+<section class="container" id="materials">
+<h2>Popular Materials</h2>
+<div class="grid" id="materialGrid"></div>
+</section>
+
+<section class="container" id="booking">
+<h2>Book Materials</h2>
+<form class="form" id="bookingForm">
+<input id="name" placeholder="Full Name" required>
+<input id="phone" placeholder="Phone Number" required>
+<input id="email" type="email" placeholder="Email">
+<select id="material" required><option value="">Select Material</option></select>
+<input id="quantity" type="number" min="1" value="1" required>
+<input id="eventDate" type="date" required>
+<select id="type"><option>Rental</option><option>Purchase</option></select>
+<textarea id="address" rows="4" placeholder="Delivery Address" required></textarea>
+<button class="btn" type="submit">Place Booking</button>
+<div id="message"></div>
+</form>
+</section>
+
+<section class="container" id="contact">
+<h2>Contact</h2><p>📞 +91 90000 00000 &nbsp; | &nbsp; ✉️ support@eventmate.com</p>
+</section>
+<footer>© 2026 EventMate - Event Material Supply</footer>
+
+<script>
+const API="http://localhost:8080/api";
+const materials=[
+{id:1,name:"Plastic Chairs",category:"Furniture",price:30,icon:"🪑"},
+{id:2,name:"Event Tables",category:"Furniture",price:150,icon:"🪑"},
+{id:3,name:"Event Tent",category:"Tent",price:2500,icon:"⛺"},
+{id:4,name:"LED Lighting",category:"Lighting",price:500,icon:"💡"},
+{id:5,name:"Sound System",category:"Audio",price:1500,icon:"🔊"},
+{id:6,name:"Decoration Set",category:"Decoration",price:1000,icon:"🎈"}
+];
+const grid=document.getElementById("materialGrid"), select=document.getElementById("material");
+materials.forEach(m=>{
+grid.innerHTML+=`<div class="card"><div class="icon">${m.icon}</div><h3>${m.name}</h3><p>${m.category}</p><p class="price">₹${m.price} / day</p><button class="btn" onclick="choose(${m.id})">Book Now</button></div>`;
+select.innerHTML+=`<option value="${m.id}">${m.name}</option>`;
+});
+function choose(id){select.value=id;document.getElementById("booking").scrollIntoView({behavior:"smooth"});}
+document.getElementById("bookingForm").addEventListener("submit",async e=>{
+e.preventDefault();
+const data={customerName:name.value,phone:phone.value,email:email.value,materialId:+material.value,quantity:+quantity.value,eventDate:eventDate.value,bookingType:type.value,address:address.value};
+try{
+const r=await fetch(API+"/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+if(!r.ok) throw new Error();
+message.textContent="Booking placed successfully!";
+message.style.color="green";e.target.reset();
+}catch(err){message.textContent="Backend not running. Start Spring Boot and try again.";message.style.color="crimson";}
+});
+</script>
+</body>
+</html>
